@@ -1,36 +1,41 @@
 <div class="card-container">
-  <h1 x-large class="sample-content">Your Content Here</h1>
-
   <hr>
-
-  <div>
-    For hot module reloading run
-    <pre>npm run start:hmr</pre>
-  </div>
-
-  <hr>
+  <h1 x-large class="sample-content">Angular 2, Webpack, Bootstrap 4, ng2-bootstrap Starter</h1>
+  <hr>  
 
   <div>
     <h4>Local State</h4>
 
-    <form (ngSubmit)="submitState(localState.value)" autocomplete="off">
+    <form class="form-inline pull-xs-right" 
+          (ngSubmit)="submitState(localState.value)" 
+          autocomplete="off">
 
       <input
+        class="form-control"
         [value]="localState.value"
         (input)="localState.value = $event.target.value"
         placeholder="Submit Local State to App State"
         autofocus>
 
-      <button md-raised-button color="primary">Submit Value</button>
+      <button class="btn btn-danger" type="submit"><i class="fa fa-search"></i> Submit Value</button>
     </form>
-    <!--
-        <input type="text" [value]="localState.value" (input)="localState.value = $event.target.value" autofocus>
+    <hr>
+      <!--<input type="text" [value]="localState.value" (input)="localState.value = $event.target.value" autofocus>
         Rather than wiring up two-way data-binding ourselves with [value] and (input)
         we can use Angular's [(ngModel)] syntax
-        <input type="text" name="textInput" [(ngModel)]="localState.value" autofocus>
-      -->
+      <input type="text" name="textInput" [(ngModel)]="localState.value" autofocus>-->
 
     <pre>this.localState = {{ localState | json }}</pre>
+
+    <hr>
+    <h4>Toast &amp; ng2-Alert</h4>
+    <div class="container">
+      <button class="btn btn-primary my-2 my-sm-0" (click)="toastMe()">Toast me!</button>
+      <br/><br/>
+      <alert type="success" dismissible="true">ng2-bootstrap Alert</alert>
+    </div>
+    <hr>
+
 
   </div>
 

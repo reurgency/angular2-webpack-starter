@@ -27,7 +27,7 @@ const ngcWebpack = require('ngc-webpack');
 const HMR = helpers.hasProcessFlag('hot');
 const AOT = helpers.hasNpmFlag('aot');
 const METADATA = {
-  title: 'Angular2 Webpack Starter by @gdi2290 from @AngularClass',
+  title: 'Angular2 Webpack Bootstrap4 Starter',
   baseUrl: '/',
   isDevServer: helpers.isWebpackDevServer()
 };
@@ -93,44 +93,25 @@ module.exports = function (options) {
       rules: [
 
         /*
-         * Typescript loader support for .ts
-         *
-         * Component Template/Style integration using `angular2-template-loader`
-         * Angular 2 lazy loading (async routes) via `ng-router-loader`
-         *
-         * `ng-router-loader` expects vanilla JavaScript code, not TypeScript code. This is why the
-         * order of the loader matter.
+         * Typescript loader support for .ts and Angular 2 async routes via .async.ts
+         * Replace templateUrl and stylesUrl with require()
          *
          * See: https://github.com/s-panferov/awesome-typescript-loader
          * See: https://github.com/TheLarkInn/angular2-template-loader
-         * See: https://github.com/shlomiassaf/ng-router-loader
          */
         {
           test: /\.ts$/,
           use: [
+            '@angularclass/hmr-loader?pretty=' + !isProd + '&prod=' + isProd,
+            'awesome-typescript-loader?{configFileName: "tsconfig.webpack.json"}',
+            'angular2-template-loader',
             {
-              loader: '@angularclass/hmr-loader',
-              options: {
-                pretty: !isProd,
-                prod: isProd
-              }
-            },
-            { // MAKE SURE TO CHAIN VANILLA JS CODE, I.E. TS COMPILATION OUTPUT.
               loader: 'ng-router-loader',
               options: {
-                loader: 'async-import',
+                loader: 'async-system',
                 genDir: 'compiled',
                 aot: AOT
               }
-            },
-            {
-              loader: 'awesome-typescript-loader',
-              options: {
-                configFileName: 'tsconfig.webpack.json'
-              }
-            },
-            {
-              loader: 'angular2-template-loader'
             }
           ],
           exclude: [/\.(spec|e2e)\.ts$/]
@@ -145,6 +126,13 @@ module.exports = function (options) {
           test: /\.json$/,
           use: 'json-loader'
         },
+
+        /* ------ JB: Add ------- */
+        { test: /\.scss$/, loaders: ['raw-loader', 'sass-loader'] },
+        { test: /\.(woff2?|ttf|eot|svg)$/, loader: 'url?limit=10000&name=[name].[ext]' },
+        // Bootstrap 4
+        { test: /bootstrap\/dist\/js\/umd\//, loader: 'imports?jQuery=jquery' },
+        /* ------ END JB: Add ------- */
 
         /*
          * to string and css loader support for *.css files (from Angular components)
@@ -162,11 +150,11 @@ module.exports = function (options) {
          * Returns compiled css content as string
          *
          */
-        {
-          test: /\.scss$/,
-          use: ['to-string-loader', 'css-loader', 'sass-loader'],
-          exclude: [helpers.root('src', 'styles')]
-        },
+        // {
+        //   test: /\.scss$/,
+        //   use: ['to-string-loader', 'css-loader', 'sass-loader'],
+        //   exclude: [helpers.root('src', 'styles')]
+        // },
 
         /* Raw loader support for *.html
          * Returns file content as string
@@ -225,7 +213,7 @@ module.exports = function (options) {
       new CommonsChunkPlugin({
         name: 'vendor',
         chunks: ['main'],
-        minChunks: module => /node_modules/.test(module.resource)
+        minChunks: module => /node_modules\//.test(module.resource)
       }),
       // Specify the correct order the scripts will be injected in
       new CommonsChunkPlugin({
@@ -320,7 +308,65 @@ module.exports = function (options) {
        *
        * See: https://gist.github.com/sokra/27b24881210b56bbaff7
        */
-      new LoaderOptionsPlugin({}),
+      new LoaderOptionsPlugin({
+
+        /* ------ JB: Add ------- */
+
+        debug: true,
+        options: {
+           context: helpers.root(),
+          output: {
+              path: helpers.root('dist')
+          },
+          /**
+           * Static analysis linter for TypeScript advanced options configuration
+           * Description: An extensible linter for the TypeScript language.
+           *
+           * See: https://github.com/wbuchwalter/tslint-loader
+           */
+          tslint: {
+            emitErrors: false,
+            failOnHint: false,
+            resourcePath: 'src'
+          }
+        }
+        /* ------ End JB: Add ------- */
+
+      }),
+
+
+      /* ------ JB: Add ------- */
+        
+      /*
+       * Plugin: ProvidePlugin
+       * Description: Automatically loaded modules. Module (value) is loaded when the identifier (key)
+       * is used as free variable in a module. The identifier is filled with the exports of the loaded module.
+       *
+       * See: https://webpack.github.io/docs/list-of-plugins.html#provideplugin
+       */
+      new webpack.ProvidePlugin({
+        jQuery: 'jquery',
+        $: 'jquery',
+        jquery: 'jquery',
+        'window.jQuery': 'jquery',
+        "Tether": 'tether',
+        "window.Tether": "tether",
+        Hammer: 'hammerjs/hammer',
+        // Tooltip: "exports?Tooltip!bootstrap/js/dist/tooltip",
+        // Alert: "exports?Alert!bootstrap/js/dist/alert",
+        // Button: "exports?Button!bootstrap/js/dist/button",
+        // Carousel: "exports?Carousel!bootstrap/js/dist/carousel",
+        // Collapse: "exports?Collapse!bootstrap/js/dist/collapse",
+        // Dropdown: "exports?Dropdown!bootstrap/js/dist/dropdown",
+        // Modal: "exports?Modal!bootstrap/js/dist/modal",
+        // Popover: "exports?Popover!bootstrap/js/dist/popover",
+        // Scrollspy: "exports?Scrollspy!bootstrap/js/dist/scrollspy",
+        // Tab: "exports?Tab!bootstrap/js/dist/tab",
+        // Util: "exports?Util!bootstrap/js/dist/util"
+      }),
+
+      /* ------ END JB: Add ------- */
+
 
       // Fix Angular 2
       new NormalModuleReplacementPlugin(
